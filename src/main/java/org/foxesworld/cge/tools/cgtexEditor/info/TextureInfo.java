@@ -27,8 +27,6 @@ public class TextureInfo {
     public int getHeight() { return height; }
     public byte getFormatCode() { return formatCode; }
     public byte[] getData() { return data; }
-
-    /** Декодирует DDS→BufferedImage (синглтон-кэш) */
     public BufferedImage getPreviewImage() {
         if (preview == null) {
             preview = DDSDecoder.decode(width, height, formatCode, data);

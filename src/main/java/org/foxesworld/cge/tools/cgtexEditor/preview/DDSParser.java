@@ -2,110 +2,85 @@ package org.foxesworld.cge.tools.cgtexEditor.preview;
 
 import org.foxesworld.cge.tools.cgtexEditor.info.TextureInfo;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
+/**
+ * DDSParser provides functionality to parse a DDS file from a byte array
+ * and extract its width, height, format code, and compressed data into a TextureInfo.
+ */
 public class DDSParser {
 
-    public static TextureInfo parse(File f) throws IOException {
-        try (RandomAccessFile raf = new RandomAccessFile(f, "r")) {
-            byte[] hdr = new byte[128];
-            raf.readFully(hdr);
+    private static final int DDS_HEADER_SIZE = 128;
+    private static final int SIGNATURE_LENGTH = 4;
+    private static final int HEIGHT_OFFSET = 12;
+    private static final int WIDTH_OFFSET = 16;
+    private static final int FORMAT_CODE_OFFSET = 84;
+    private static final int NAME_OFFSET = 88;
+    private static final int FORMAT_CODE_LENGTH = 4;
+    private static final int NAME_LENGTH = 8;
 
-            // Проверка, что файл - это DDS
-            if (hdr[0] != 'D' || hdr[1] != 'D' || hdr[2] != 'S' || hdr[3] != ' ') {
-                throw new IOException("Not a DDS file: " + f.getName());
-            }
-
-            ByteBuffer buf = ByteBuffer.wrap(hdr).order(ByteOrder.LITTLE_ENDIAN);
-
-            // Пропуск 12 байтов заголовка
-            buf.position(12);
-
-            // Чтение высоты и ширины
-            int height = buf.getInt();
-            int width = buf.getInt();
-
-            // Пропуск до 84-го байта, где начинается имя и формат
-            buf.position(84);
-
-            // Чтение формата (DXT1, DXT3, DXT5)
-            byte[] four = new byte[4];
-            buf.get(four);
-            String code = new String(four, StandardCharsets.UTF_8);
-
-            // Чтение имени текстуры (до 8 байтов)
-            byte[] nameBytes = new byte[8];
-            buf.get(nameBytes);
-            String texName = new String(nameBytes, StandardCharsets.UTF_8).trim();
-
-            // Определение формата текстуры
-            byte fmt = switch (code) {
-                case "DXT1" -> 1;
-                case "DXT3" -> 3;
-                case "DXT5" -> 5;
-                default -> throw new IOException("Unsupported DDS format: " + code);
-            };
-
-            // Чтение данных текстуры
-            long remaining = raf.length() - 128;
-            byte[] data = new byte[(int) remaining];
-            raf.readFully(data);
-
-            return new TextureInfo(f, width, height, texName, fmt, data);
-        }
-    }
-
+    /**
+     * Parses the given byte array as a DDS file and returns a TextureInfo instance.
+     * The method verifies the DDS signature, reads width and height, determines the
+     * DXT format (1, 3, or 5), extracts the texture name (up to 8 characters), and
+     * copies the remaining compressed data bytes.
+     *
+     * @param fileBytes a byte array containing the full contents of a DDS file
+     * @return a TextureInfo object populated with texture metadata and data
+     * @throws IOException if the byte array does not represent a valid or supported DDS file
+     */
     public static TextureInfo parseBytes(byte[] fileBytes) throws IOException {
-        // Чтение данных из байтового массива
-        ByteArrayInputStream bais = new ByteArrayInputStream(fileBytes);
-        byte[] hdr = new byte[128];
-        bais.read(hdr);
-
-        // Проверка, что файл - это DDS
-        if (hdr[0] != 'D' || hdr[1] != 'D' || hdr[2] != 'S' || hdr[3] != ' ') {
-            throw new IOException("Not a DDS file: Invalid data");
+        if (fileBytes == null || fileBytes.length < DDS_HEADER_SIZE) {
+            throw new IOException("Invalid DDS data: insufficient length");
         }
 
-        ByteBuffer buf = ByteBuffer.wrap(hdr).order(ByteOrder.LITTLE_ENDIAN);
+        // Verify DDS signature "DDS "
+        if (fileBytes[0] != 'D' || fileBytes[1] != 'D' || fileBytes[2] != 'S' || fileBytes[3] != ' ') {
+            throw new IOException("Not a DDS file: invalid signature");
+        }
 
-        // Пропуск 12 байтов заголовка
-        buf.position(12);
+        // Wrap the header bytes in a little-endian ByteBuffer for reading integers
+        ByteBuffer headerBuffer = ByteBuffer.wrap(fileBytes, 0, DDS_HEADER_SIZE)
+                .order(ByteOrder.LITTLE_ENDIAN);
 
-        // Чтение высоты и ширины
-        int height = buf.getInt();
-        int width = buf.getInt();
+        // Read height and width from header offsets
+        int height = headerBuffer.getInt(HEIGHT_OFFSET);
+        int width = headerBuffer.getInt(WIDTH_OFFSET);
 
-        // Пропуск до 84-го байта, где начинается имя и формат
-        buf.position(84);
+        // Read the four-character format code (e.g., "DXT1", "DXT3", "DXT5")
+        String formatCode = new String(
+                fileBytes, FORMAT_CODE_OFFSET, FORMAT_CODE_LENGTH, StandardCharsets.UTF_8
+        );
 
-        // Чтение формата (DXT1, DXT3, DXT5)
-        byte[] four = new byte[4];
-        buf.get(four);
-        String code = new String(four, StandardCharsets.UTF_8);
+        // Determine numeric format identifier
+        byte formatId;
+        switch (formatCode) {
+            case "DXT1" -> formatId = 1;
+            case "DXT3" -> formatId = 3;
+            case "DXT5" -> formatId = 5;
+            default -> throw new IOException("Unsupported DDS format: " + formatCode);
+        }
 
-        // Чтение имени текстуры (до 8 байтов)
-        byte[] nameBytes = new byte[8];
-        buf.get(nameBytes);
-        String texName = new String(nameBytes, StandardCharsets.UTF_8).trim();
+        // Read the texture name (up to 8 ASCII characters, trimmed of trailing nulls/spaces)
+        String textureName = new String(
+                fileBytes, NAME_OFFSET, NAME_LENGTH, StandardCharsets.UTF_8
+        ).trim();
 
-        // Определение формата текстуры
-        byte fmt = switch (code) {
-            case "DXT1" -> 1;
-            case "DXT3" -> 3;
-            case "DXT5" -> 5;
-            default -> throw new IOException("Unsupported DDS format: " + code);
-        };
+        // Extract compressed texture data starting immediately after the 128-byte header
+        byte[] data = Arrays.copyOfRange(fileBytes, DDS_HEADER_SIZE, fileBytes.length);
 
-        // Чтение данных текстуры из оставшихся байтов
-        byte[] data = new byte[fileBytes.length - 128];
-        bais.read(data);
-
-        return new TextureInfo(new File(texName), width, height, texName, fmt, data);
+        return new TextureInfo(
+                new File(textureName),
+                width,
+                height,
+                textureName,
+                formatId,
+                data
+        );
     }
 }
