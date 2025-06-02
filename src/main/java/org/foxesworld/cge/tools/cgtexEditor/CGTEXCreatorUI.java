@@ -10,44 +10,46 @@ import org.foxesworld.cge.tools.cgtexEditor.utils.UIUtils;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * CGTEXCreatorUI is the main application window that combines a FileListPanel
- * for managing DDS textures, a PreviewPanel for displaying the selected texture,
- * and buttons to read from or save to a .cgtex file.
+ * Main application window for creating and editing .cgtex files.
+ * <p>
+ * Combines:
+ * <ul>
+ *     <li>FileListPanel for managing DDS textures</li>
+ *     <li>PreviewPanel for displaying the selected texture</li>
+ *     <li>Buttons to read from/save to a .cgtex file and to add/remove DDS textures</li>
+ * </ul>
+ * All JButton instances are created via the createButton(...) factory to eliminate redundant code.
  */
 public class CGTEXCreatorUI extends JFrame {
-
     private static final String FILTER_CGTEX = "cgtex";
-
     private JButton addBtn, remBtn, readBtn, saveBtn;
-    private JPanel bottomButtons;
     private final FileListPanel fileListPanel;
     private final PreviewPanel previewPanel;
     private File selectedCgtFile;
 
     /**
-     * Constructs the main UI window, sets up frame properties, window icon,
-     * and initializes all UI components.
+     * Constructs the main UI, configures frame properties, initializes buttons,
+     * and builds the user interface.
      */
     public CGTEXCreatorUI() {
         super("CGTEX Creator");
         configureFrame();
-        initBtns();
+        initButtons();
         this.previewPanel = new PreviewPanel(this);
         this.fileListPanel = new FileListPanel(this);
         UIUtils.setFrameIconFromICO(this);
         initUI();
-
     }
 
     /**
-     * Configures basic JFrame properties such as size, close operation,
-     * and debug-related system properties.
+     * Configures basic JFrame properties such as size, close operation, and logging system properties.
      */
     private void configureFrame() {
         System.setProperty("log.dir", System.getProperty("user.dir"));
@@ -57,42 +59,73 @@ public class CGTEXCreatorUI extends JFrame {
         setLocationRelativeTo(null);
     }
 
-    private void initBtns(){
-        saveBtn = new JButton("Save .cgtex", UIUtils.loadIcon("save_icon.png"));
-        saveBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
-        saveBtn.setIconTextGap(10);
-        saveBtn.putClientProperty("JButton.buttonType", "roundRect");
-        saveBtn.putClientProperty("FlatLaf.style", "background: #336699;");
-        saveBtn.addActionListener(e -> onSaveCGTEX());
+    /**
+     * Initializes all buttons using the createButton factory method.
+     */
+    private void initButtons() {
+        saveBtn = createButton(
+                "Save .cgtex",
+                "save_icon.png",
+                "#336699",
+                e -> onSaveCGTEX(),
+                true
+        );
 
-        readBtn = new JButton("Read CGTEX", UIUtils.loadIcon("read_icon.png"));
-        readBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
-        readBtn.putClientProperty("FlatLaf.style", "background: #2ccfb7;");
-        readBtn.setIconTextGap(10);
-        readBtn.putClientProperty("JButton.buttonType", "roundRect");
-        readBtn.addActionListener(e -> onReadCGTEX());
+        readBtn = createButton(
+                "Read CGTEX",
+                "read_icon.png",
+                "#2ccfb7",
+                e -> onReadCGTEX(),
+                true
+        );
 
-        addBtn = new JButton("Add DDS", UIUtils.loadIcon("add_icon.png"));
-        addBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
-        addBtn.putClientProperty("FlatLaf.style", "background: #1bcc36bd;");
-        addBtn.setIconTextGap(10);
+        addBtn = createButton(
+                "Add DDS",
+                "add_icon.png",
+                "#1bcc36bd",
+                null,
+                true
+        );
 
-        remBtn = new JButton("Remove", UIUtils.loadIcon("remove_icon.png"));
-        remBtn.setEnabled(false);
-        remBtn.putClientProperty("FlatLaf.style", "background: #c51e3ebd;");
-        remBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
-        remBtn.setIconTextGap(10);
-
+        remBtn = createButton(
+                "Remove",
+                "remove_icon.png",
+                "#c51e3ebd",
+                null,
+                false
+        );
     }
 
     /**
-     * Initializes and arranges UI components:
+     * Factory method for creating a JButton with consistent styling.
+     *
+     * @param text     the button label
+     * @param iconName the filename for the icon (loaded via UIUtils.loadIcon)
+     * @param bgColor  the background color in hex format (e.g., "#336699")
+     * @param listener ActionListener for the button (may be null)
+     * @param enabled  initial enabled state of the button
+     * @return a configured JButton instance
+     */
+    private JButton createButton(String text, String iconName, String bgColor, ActionListener listener, boolean enabled) {
+        JButton btn = new JButton(text, UIUtils.loadIcon(iconName));
+        btn.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btn.setIconTextGap(10);
+        btn.putClientProperty("JButton.buttonType", "roundRect");
+        btn.putClientProperty("FlatLaf.style", "background: " + bgColor + ";");
+        btn.setEnabled(enabled);
+        if (listener != null) {
+            btn.addActionListener(listener);
+        }
+        return btn;
+    }
+
+    /**
+     * Builds and arranges the UI components:
      * <ul>
-     *     <li>A "Read CGTEX" button at the top to open and parse a .cgtex file.</li>
-     *     <li>A JSplitPane dividing the FileListPanel (left) and PreviewPanel (right).</li>
-     *     <li>A "Save .cgtex" button at the bottom to write out the current textures.</li>
+     *     <li>Top panel with Read and Save buttons</li>
+     *     <li>Split pane separating FileListPanel (left) and PreviewPanel (right)</li>
+     *     <li>Bottom panel with Add and Remove buttons</li>
      * </ul>
-     * Also connects list selection events to update the preview.
      */
     private void initUI() {
         JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
@@ -106,7 +139,6 @@ public class CGTEXCreatorUI extends JFrame {
         topButtons.add(saveBtn);
 
         fileListPanel.getFileList().addListSelectionListener(e -> {
-            JButton remBtn = (JButton) getBottomButtons().getComponent(1);
             remBtn.setEnabled(this.fileListPanel.getSelectedTexture() != null);
             if (!e.getValueIsAdjusting()) {
                 TextureInfo info = fileListPanel.getSelectedTexture();
@@ -122,12 +154,12 @@ public class CGTEXCreatorUI extends JFrame {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftWrapper, previewScroll);
         splitPane.setResizeWeight(0.3);
 
-        bottomButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        JPanel bottomButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
         bottomButtons.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),    // рамка в стиле FlatLaf
-                "Texture Actions",                             // текст заголовка
-                TitledBorder.LEADING,                  // выравнивание заголовка по левому краю
-                TitledBorder.TOP                        // расположение заголовка сверху
+                BorderFactory.createEtchedBorder(),
+                "Texture Actions",
+                TitledBorder.LEADING,
+                TitledBorder.TOP
         ));
         bottomButtons.add(addBtn);
         bottomButtons.add(remBtn);
@@ -140,9 +172,9 @@ public class CGTEXCreatorUI extends JFrame {
     }
 
     /**
-     * Handles the "Read CGTEX" action by opening a file chooser to select a .cgtex file,
-     * reading its contents via CGTEXFile, converting each TextureEntry to a TextureInfo,
-     * and populating the FileListPanel with the loaded textures.
+     * Handles the "Read CGTEX" button action:
+     * Opens a file chooser, reads the selected .cgtex file,
+     * converts TextureEntry objects to TextureInfo, and populates the FileListPanel.
      */
     private void onReadCGTEX() {
         JFileChooser chooser = UIUtils.createFileChooser("Select CGTEX File", FILTER_CGTEX, false);
@@ -179,9 +211,10 @@ public class CGTEXCreatorUI extends JFrame {
     }
 
     /**
-     * Handles the "Save .cgtex" action by gathering all TextureInfo instances
-     * from the FileListPanel, prompting the user for a target .cgtex file if necessary,
-     * and writing out a new CGTEXFile containing TextureEntry objects converted from TextureInfo.
+     * Handles the "Save .cgtex" button action:
+     * Gathers all TextureInfo instances from the FileListPanel,
+     * prompts for a target .cgtex file if necessary, converts TextureInfo to TextureEntry,
+     * and writes them using CGTEXFile.
      */
     private void onSaveCGTEX() {
         List<TextureInfo> textures = fileListPanel.getAllTextures();
@@ -235,9 +268,9 @@ public class CGTEXCreatorUI extends JFrame {
     }
 
     /**
-     * The entry point of the application, which sets up the theme and launches the main UI.
+     * Application entry point. Sets up the theme and launches the UI on the Event Dispatch Thread.
      *
-     * @param args command-line arguments (unused)
+     * @param args unused command-line arguments
      */
     public static void main(String[] args) {
         UIUtils.setupTheme("theme/calista.properties");
@@ -253,17 +286,5 @@ public class CGTEXCreatorUI extends JFrame {
 
     public JButton getRemBtn() {
         return remBtn;
-    }
-
-    public JButton getReadBtn() {
-        return readBtn;
-    }
-
-    public JButton getSaveBtn() {
-        return saveBtn;
-    }
-
-    public JPanel getBottomButtons() {
-        return bottomButtons;
     }
 }

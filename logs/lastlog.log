@@ -1,6 +1,6 @@
-[13:17:52.537][DEBUG][CGTEXFileReader] ================ CGTEX FILE READ START ================
-[13:17:52.544][DEBUG][CGTEXFileReader] Opening file: C:\Users\Aiden\Documents\testData.cgtex
-[13:17:52.550][DEBUG][CGTEXFileReader] Full file HEX dump (6984601 bytes)
-[13:17:52.556][DEBUG][CGTEXFileReader] Header Parsed: CGTEXMetadata{magic='CGTX', version=1, textureCount=10, dataOffset=20, fileSize=6984601}
-[13:17:52.563][DEBUG][CGTEXFileReader] ================= CGTEX FILE READ END =================
-[13:17:52.564][INFO][AbstractFile] Closing C:\Users\Aiden\Documents\testData.cgtex
+[13:31:57.622][DEBUG][CGTEXFileReader] ================ CGTEX FILE READ START ================
+[13:31:57.630][DEBUG][CGTEXFileReader] Opening file: C:\Users\Aiden\Documents\testData.cgtex
+[13:31:57.634][DEBUG][CGTEXFileReader] Full file HEX dump (5365403 bytes)
+[13:31:57.640][DEBUG][CGTEXFileReader] Header Parsed: CGTEXMetadata{magic='CGTX', version=1, textureCount=6, dataOffset=20, fileSize=5365403}
+[13:31:57.645][DEBUG][CGTEXFileReader] ================= CGTEX FILE READ END =================
+[13:31:57.646][INFO][AbstractFile] Closing C:\Users\Aiden\Documents\testData.cgtex
