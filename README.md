@@ -18,6 +18,14 @@
 
 **CGTEX** — это собственный бинарный формат текстур, используемый в игровом движке **Calista Game Engine**. Он разработан для эффективного хранения, загрузки и обработки текстур в сценах.
 
+### ❓ Почему CGTEX?
+
+В отличие от стандартных PNG или DDS, формат **CGTEX** оптимизирован для нужд игрового движка:
+- Мгновенная десериализация
+- Минимальные накладные расходы
+- Поддержка метаданных и флагов
+- В будущих обновлениях можно будет импортировать текстуры из PNG/JPG и они будут автоматически елнвертированы в GXT ✨
+
 ### 🔧 Особенности:
 - Поддержка различных форматов изображений (RGBA, RGB, Grayscale и др.)
 - Встроенные метаданные (размер, имя, флаги)
@@ -50,6 +58,15 @@
 ## 🇬🇧 CGTEX — Texture Format for Calista Game Engine
 
 **CGTEX** is a custom binary texture format used in the **Calista Game Engine**. It is designed for efficient storage, loading, and manipulation of texture data in game scenes.
+## ❓ Why CGTEX?
+
+Unlike PNG or DDS, **CGTEX** is designed for:
+
+- 🔄 **Raw deserialization into GPU**
+- 🚫 **No overhead, no parsing**
+- 🏷️ **Metadata & flag support for game engines**
+- In fututre you will be able to import textures from PNG/JPG and they will be converted to DXT ✨
+
 
 ### 🔧 Features:
 - Supports multiple image formats (RGBA, RGB, Grayscale, etc.)
