@@ -1,5 +1,7 @@
-package org.foxesworld.cge.tools.cgtexEditor;
+package org.foxesworld.cge.tools.cgtexEditor.panels;
 
+import org.foxesworld.cge.tools.cgtexEditor.CGTEXCreatorUI;
+import org.foxesworld.cge.tools.cgtexEditor.utils.UIUtils;
 import org.foxesworld.cge.tools.cgtexEditor.info.TextureInfo;
 import org.foxesworld.cge.tools.cgtexEditor.preview.DDSParser;
 
@@ -33,22 +35,16 @@ public class FileListPanel extends JPanel {
      * Constructs a FileListPanel with Add DDS and Remove buttons, a JList for textures,
      * and a layered pane that overlays a large semi-transparent count label.
      */
-    public FileListPanel() {
+    public FileListPanel(CGTEXCreatorUI cgtexCreatorUI) {
         super(new BorderLayout(5, 5));
 
-        JButton addBtn = new JButton("Add DDS", UIUtils.loadIcon("add_icon.png"));
-        addBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
-        addBtn.setIconTextGap(10);
-        addBtn.addActionListener(e -> onAdd());
 
-        JButton remBtn = new JButton("Remove", UIUtils.loadIcon("remove_icon.png"));
-        remBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
-        remBtn.setIconTextGap(10);
-        remBtn.addActionListener(e -> onRemove());
+        cgtexCreatorUI.getAddBtn().addActionListener(e -> onAdd());
+        cgtexCreatorUI.getRemBtn().addActionListener(e -> onRemove());
 
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
-        buttonsPanel.add(addBtn);
-        buttonsPanel.add(remBtn);
+        //buttonsPanel.add(addBtn);
+        //buttonsPanel.add(remBtn);
 
         fileList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         fileList.setCellRenderer(new org.foxesworld.cge.tools.cgtexEditor.preview.TextureCellRenderer());

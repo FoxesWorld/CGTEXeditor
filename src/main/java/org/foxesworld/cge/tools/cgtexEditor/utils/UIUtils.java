@@ -1,4 +1,4 @@
-package org.foxesworld.cge.tools.cgtexEditor;
+package org.foxesworld.cge.tools.cgtexEditor.utils;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;

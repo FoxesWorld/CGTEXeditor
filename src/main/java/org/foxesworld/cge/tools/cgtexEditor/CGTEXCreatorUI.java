@@ -3,8 +3,12 @@ package org.foxesworld.cge.tools.cgtexEditor;
 import org.foxesworld.cge.core.file.cgtex.CGTEXFile;
 import org.foxesworld.cge.core.file.cgtex.TextureEntry;
 import org.foxesworld.cge.tools.cgtexEditor.info.TextureInfo;
+import org.foxesworld.cge.tools.cgtexEditor.panels.FileListPanel;
+import org.foxesworld.cge.tools.cgtexEditor.panels.PreviewPanel;
+import org.foxesworld.cge.tools.cgtexEditor.utils.UIUtils;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -20,8 +24,10 @@ public class CGTEXCreatorUI extends JFrame {
 
     private static final String FILTER_CGTEX = "cgtex";
 
-    private final FileListPanel fileListPanel = new FileListPanel();
-    private final PreviewPanel previewPanel = new PreviewPanel();
+    private JButton addBtn, remBtn, readBtn, saveBtn;
+    private JPanel bottomButtons;
+    private final FileListPanel fileListPanel;
+    private final PreviewPanel previewPanel;
     private File selectedCgtFile;
 
     /**
@@ -31,8 +37,12 @@ public class CGTEXCreatorUI extends JFrame {
     public CGTEXCreatorUI() {
         super("CGTEX Creator");
         configureFrame();
+        initBtns();
+        this.previewPanel = new PreviewPanel(this);
+        this.fileListPanel = new FileListPanel(this);
         UIUtils.setFrameIconFromICO(this);
         initUI();
+
     }
 
     /**
@@ -47,6 +57,34 @@ public class CGTEXCreatorUI extends JFrame {
         setLocationRelativeTo(null);
     }
 
+    private void initBtns(){
+        saveBtn = new JButton("Save .cgtex", UIUtils.loadIcon("save_icon.png"));
+        saveBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
+        saveBtn.setIconTextGap(10);
+        saveBtn.putClientProperty("JButton.buttonType", "roundRect");
+        saveBtn.putClientProperty("FlatLaf.style", "background: #336699;");
+        saveBtn.addActionListener(e -> onSaveCGTEX());
+
+        readBtn = new JButton("Read CGTEX", UIUtils.loadIcon("read_icon.png"));
+        readBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
+        readBtn.putClientProperty("FlatLaf.style", "background: #2ccfb7;");
+        readBtn.setIconTextGap(10);
+        readBtn.putClientProperty("JButton.buttonType", "roundRect");
+        readBtn.addActionListener(e -> onReadCGTEX());
+
+        addBtn = new JButton("Add DDS", UIUtils.loadIcon("add_icon.png"));
+        addBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
+        addBtn.putClientProperty("FlatLaf.style", "background: #1bcc36bd;");
+        addBtn.setIconTextGap(10);
+
+        remBtn = new JButton("Remove", UIUtils.loadIcon("remove_icon.png"));
+        remBtn.setEnabled(false);
+        remBtn.putClientProperty("FlatLaf.style", "background: #c51e3ebd;");
+        remBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
+        remBtn.setIconTextGap(10);
+
+    }
+
     /**
      * Initializes and arranges UI components:
      * <ul>
@@ -57,15 +95,19 @@ public class CGTEXCreatorUI extends JFrame {
      * Also connects list selection events to update the preview.
      */
     private void initUI() {
-        JButton readBtn = new JButton("Read CGTEX", UIUtils.loadIcon("read_icon.png"));
-        readBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
-        readBtn.setIconTextGap(10);
-        readBtn.addActionListener(e -> onReadCGTEX());
-
         JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        topButtons.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(),
+                "File Actions",
+                TitledBorder.LEADING,
+                TitledBorder.TOP
+        ));
         topButtons.add(readBtn);
+        topButtons.add(saveBtn);
 
         fileListPanel.getFileList().addListSelectionListener(e -> {
+            JButton remBtn = (JButton) getBottomButtons().getComponent(1);
+            remBtn.setEnabled(this.fileListPanel.getSelectedTexture() != null);
             if (!e.getValueIsAdjusting()) {
                 TextureInfo info = fileListPanel.getSelectedTexture();
                 previewPanel.updatePreview(info);
@@ -80,13 +122,15 @@ public class CGTEXCreatorUI extends JFrame {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftWrapper, previewScroll);
         splitPane.setResizeWeight(0.3);
 
-        JButton saveBtn = new JButton("Save .cgtex", UIUtils.loadIcon("save_icon.png"));
-        saveBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
-        saveBtn.setIconTextGap(10);
-        saveBtn.addActionListener(e -> onSaveCGTEX());
-
-        JPanel bottomButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
-        bottomButtons.add(saveBtn);
+        bottomButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        bottomButtons.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(),    // рамка в стиле FlatLaf
+                "Texture Actions",                             // текст заголовка
+                TitledBorder.LEADING,                  // выравнивание заголовка по левому краю
+                TitledBorder.TOP                        // расположение заголовка сверху
+        ));
+        bottomButtons.add(addBtn);
+        bottomButtons.add(remBtn);
 
         Container cp = getContentPane();
         cp.setLayout(new BorderLayout(5, 5));
@@ -201,5 +245,25 @@ public class CGTEXCreatorUI extends JFrame {
             CGTEXCreatorUI ui = new CGTEXCreatorUI();
             ui.setVisible(true);
         });
+    }
+
+    public JButton getAddBtn() {
+        return addBtn;
+    }
+
+    public JButton getRemBtn() {
+        return remBtn;
+    }
+
+    public JButton getReadBtn() {
+        return readBtn;
+    }
+
+    public JButton getSaveBtn() {
+        return saveBtn;
+    }
+
+    public JPanel getBottomButtons() {
+        return bottomButtons;
     }
 }

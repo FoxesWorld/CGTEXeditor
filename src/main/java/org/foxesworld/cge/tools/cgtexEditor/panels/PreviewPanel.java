@@ -1,5 +1,6 @@
-package org.foxesworld.cge.tools.cgtexEditor;
+package org.foxesworld.cge.tools.cgtexEditor.panels;
 
+import org.foxesworld.cge.tools.cgtexEditor.CGTEXCreatorUI;
 import org.foxesworld.cge.tools.cgtexEditor.info.TextureInfo;
 import org.foxesworld.cge.tools.cgtexEditor.preview.PreviewCell;
 
@@ -15,8 +16,10 @@ public class PreviewPanel extends JPanel {
     /**
      * Constructs a PreviewPanel with a titled border labeled "Preview".
      */
-    public PreviewPanel() {
+    private final CGTEXCreatorUI cgtexCreatorUI;
+    public PreviewPanel(CGTEXCreatorUI cgtexCreatorUI) {
         super(new BorderLayout());
+        this.cgtexCreatorUI = cgtexCreatorUI;
         this.setBorder(new TitledBorder("Preview"));
     }
 
@@ -41,7 +44,9 @@ public class PreviewPanel extends JPanel {
                         JOptionPane.ERROR_MESSAGE
                 );
             }
+
         }
+
         this.revalidate();
         this.repaint();
     }
