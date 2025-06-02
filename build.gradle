@@ -1,0 +1,60 @@
+plugins {
+    id 'java'
+    id 'application' // <-- Обязательно
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'org.graalvm.buildtools.native' version '0.9.25'
+}
+
+group = 'org.foxesworld.cge'
+version = '1.0.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+application {
+    mainClass = 'org.foxesworld.cge.tools.cgtexEditor.CGTEXCreatorUI'
+}
+
+dependencies {
+    // implementation 'org.fusesource.jansi:jansi:2.4.0'
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+    implementation 'org.slf4j:jul-to-slf4j:2.0.0'
+
+    implementation 'com.formdev:flatlaf:3.4.1'
+    implementation 'com.formdev:flatlaf-extras:3.4.1'
+}
+
+graalvmNative {
+    binaries {
+        named("main") {
+            imageName.set("GTEXEditor")
+            mainClass.set("org.foxesworld.cge.tools.cgtexEditor.CGTEXCreatorUI")
+            buildArgs.addAll([
+                    "--no-fallback",
+                    "--initialize-at-build-time=javax.swing,java.awt,com.formdev.flatlaf",
+                    "--initialize-at-run-time=javax.swing,java.awt,com.formdev.flatlaf.ui.FlatUIUtils",
+                    "--allow-incomplete-classpath"
+            ])
+        }
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('all')
+    mergeServiceFiles()
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Main-Class': application.mainClass
+        )
+    }
+}
+
+tasks.named('build') {
+    dependsOn(tasks.named('shadowJar'))
+    //dependsOn(tasks.named('nativeCompile')) // <-- корректная задача
+}
