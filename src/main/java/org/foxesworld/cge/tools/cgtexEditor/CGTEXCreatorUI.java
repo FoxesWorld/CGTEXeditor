@@ -14,10 +14,12 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Main application window for creating and editing .cgtex files.
+ *
  * <p>
  * Combines:
  * <ul>
@@ -26,9 +28,11 @@ import java.util.List;
  *     <li>Buttons to read from/save to a .cgtex file and to add/remove DDS textures</li>
  * </ul>
  * All JButton instances are created via the createButton(...) factory to eliminate redundant code.
+ * </p>
  */
 public class CGTEXCreatorUI extends JFrame {
     private static final String FILTER_CGTEX = "cgtex";
+
     private JButton addBtn, remBtn, readBtn, saveBtn;
     private final FileListPanel fileListPanel;
     private final PreviewPanel previewPanel;
@@ -106,7 +110,13 @@ public class CGTEXCreatorUI extends JFrame {
      * @param enabled  initial enabled state of the button
      * @return a configured JButton instance
      */
-    private JButton createButton(String text, String iconName, String bgColor, ActionListener listener, boolean enabled) {
+    private JButton createButton(
+            String text,
+            String iconName,
+            String bgColor,
+            ActionListener listener,
+            boolean enabled
+    ) {
         JButton btn = new JButton(text, UIUtils.loadIcon(iconName));
         btn.setHorizontalTextPosition(SwingConstants.RIGHT);
         btn.setIconTextGap(10);
@@ -188,17 +198,26 @@ public class CGTEXCreatorUI extends JFrame {
             List<TextureEntry> entries = reader.readFile().getTextures();
             List<TextureInfo> loaded = new ArrayList<>(entries.size());
             for (TextureEntry entry : entries) {
+                int width = entry.getWidth();
+                int height = entry.getHeight();
+                String name = entry.getName();
+                byte format = entry.getFormat();
+                int mipCount = entry.getMipMapCount();
+                byte[] baseLevelData = entry.getMipMapLevelData(0);
+
                 TextureInfo info = new TextureInfo(
-                        new File(entry.getName()),
-                        entry.getWidth(),
-                        entry.getHeight(),
-                        entry.getName(),
-                        entry.getFormat(),
-                        entry.getCompressedData()
+                        new File(name),
+                        width,
+                        height,
+                        name,
+                        format,
+                        baseLevelData
                 );
+                info.setMipMapCount(mipCount);
                 loaded.add(info);
             }
             fileListPanel.refreshFileList(loaded);
+
         } catch (IOException e) {
             JOptionPane.showMessageDialog(
                     this,
@@ -219,7 +238,12 @@ public class CGTEXCreatorUI extends JFrame {
     private void onSaveCGTEX() {
         List<TextureInfo> textures = fileListPanel.getAllTextures();
         if (textures.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No textures to save.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No textures to save.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
             return;
         }
 
@@ -241,13 +265,15 @@ public class CGTEXCreatorUI extends JFrame {
         try (CGTEXFile writer = new CGTEXFile(selectedCgtFile, "rw")) {
             List<TextureEntry> entries = new ArrayList<>(textures.size());
             for (TextureInfo ti : textures) {
-                entries.add(new TextureEntry(
-                        ti.getWidth(),
-                        ti.getHeight(),
-                        ti.getName(),
-                        ti.getFormatCode(),
-                        ti.getData()
-                ));
+                int width = ti.getWidth();
+                int height = ti.getHeight();
+                String name = ti.getName();
+                byte format = ti.getFormatCode();
+                byte[] data = ti.getData();
+                int mipMapCount = ti.getMipMapCount();
+                List<byte[]> mipLevels = Collections.singletonList(data);
+                TextureEntry entry = new TextureEntry(width, height, name, format, mipMapCount, mipLevels);
+                entries.add(entry);
             }
             writer.writeFile(entries);
             JOptionPane.showMessageDialog(

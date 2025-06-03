@@ -8,92 +8,105 @@ import org.foxesworld.cge.core.file.cgtex.CGTEXMetadata;
 import org.foxesworld.cge.core.file.cgtex.TextureEntry;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Читает CGTEX файл, содержащий DXT текстуры.
+ * Reads a CGTEX file containing DXT textures, including MipMap levels.
  */
 public class CGTEXFileReader extends FileReader {
     private static final Logger logger = LogManager.getLogger(CGTEXFileReader.class);
-    //private final CGTEXFile cgtexFile;
+
     private final CGTEXMetadata metadata;
     private final List<TextureEntry> textures = new ArrayList<>();
 
-    /**
-     * Конструктор для чтения CGTEX файла.
-     * @param cgtexFile CGTEXFile, с которым будет работать этот класс.
-     * @throws IOException Если произошла ошибка при чтении.
-     */
     public CGTEXFileReader(CGTEXFile cgtexFile) throws IOException {
         super(cgtexFile);
-        logger.debug("================ CGTEX FILE READ START ================");
         logger.debug("Opening file: {}", cgtexFile.getFile().getAbsolutePath());
 
-        // DEBUG: Вывод полного дампа файла в HEX
         try {
             byte[] allBytes = Files.readAllBytes(cgtexFile.getFile().toPath());
-            logger.debug("Full file HEX dump ({} bytes)", allBytes.length);
+            logger.debug("Full file size = {} bytes", allBytes.length);
         } catch (IOException e) {
-            logger.warn("Failed to dump full file hex: {}", e.getMessage());
+            logger.warn("Failed to read full file bytes: {}", e.getMessage());
         }
 
-        // Чтение заголовка
         this.metadata = readHeader();
-        logger.debug("Header Parsed: {}", metadata);
+        logger.debug("Header parsed: {}", metadata);
 
-        // Чтение текстур
         raf.seek(metadata.getDataOffset());
+
         for (int i = 0; i < metadata.getTextureCount(); i++) {
             int width = raf.readUnsignedShort();
             int height = raf.readUnsignedShort();
+            int mipMapCount = raf.readInt();
+            if (mipMapCount <= 0) {
+                throw new IOException("Invalid mipMapCount (" + mipMapCount + ") for texture index " + i);
+            }
+            logger.debug("Texture[{}]: width={} height={} mipMapCount={}", i, width, height, mipMapCount);
 
-            // Чтение длины имени текстуры (4 байта)
             int nameLength = raf.readInt();
+            if (nameLength < 0) {
+                throw new IOException("Invalid nameLength (" + nameLength + ") for texture index " + i);
+            }
             byte[] nameBytes = new byte[nameLength];
-
-            // Чтение имени текстуры
             raf.readFully(nameBytes);
             String name = new String(nameBytes, StandardCharsets.UTF_8);
-
-            // Проверка на пустое имя
             if (name.isEmpty()) {
-                logger.warn("Empty texture name found at index {}", i);
-                name = "UnnamedTexture_" + i; // Назначаем имя по умолчанию
+                name = "UnnamedTexture_" + i;
             }
 
             byte format = raf.readByte();
-            int dataLength = raf.readInt();
-            byte[] data = new byte[dataLength];
 
-            raf.readFully(data);
+            long align = raf.getFilePointer() % 4;
+            if (align != 0) {
+                raf.skipBytes((int) (4 - align));
+            }
 
-            TextureEntry entry = new TextureEntry(width, height, name, format, data);
+            List<byte[]> mipMapLevels = new ArrayList<>(mipMapCount);
+            for (int level = 0; level < mipMapCount; level++) {
+                int dataLength = raf.readInt();
+                if (dataLength < 0) {
+                    throw new IOException("Invalid dataLength (" + dataLength +
+                            ") at texture #" + i + ", mip level " + level);
+                }
+                byte[] levelData = new byte[dataLength];
+                raf.readFully(levelData);
+                mipMapLevels.add(levelData);
+            }
+
+            TextureEntry entry = new TextureEntry(width, height, name, format, mipMapCount, mipMapLevels);
+            entry.setMipMapCount(mipMapCount);
             textures.add(entry);
-            //logger.debug("Texture[{}]: name={} size={}x{} format={}", i, entry.getName(), entry.getWidth()+'x'+entry.getHeight(), format);
+            logger.info("Texture[{}] parsed: {} ({} mip levels)", i, entry.getName(), mipMapCount);
         }
 
-        logger.debug("================= CGTEX FILE READ END =================");
+        logger.debug("Finished reading CGTEX file");
     }
 
     private CGTEXMetadata readHeader() throws IOException {
-        raf.seek(0); // Перемещаем указатель в начало файла
+        raf.seek(0);
         byte[] magicBytes = new byte[4];
         raf.readFully(magicBytes);
-        String magic = new String(magicBytes);
-
-        if (!this.getThisFile().getMAGIC().equals(magic)) {
+        String magic = new String(magicBytes, StandardCharsets.US_ASCII);
+        if (!getThisFile().getMAGIC().equals(magic)) {
             throw new IOException("Invalid CGTEX file magic: " + magic);
         }
 
         int version = raf.readInt();
         int textureCount = raf.readInt();
-        long dataOffset = raf.readLong();
-        long fileSize = raf.length();
+        if (textureCount < 0) {
+            throw new IOException("Invalid textureCount: " + textureCount);
+        }
 
+        long dataOffset = raf.readLong();
+        if (dataOffset < 0 || dataOffset > raf.length()) {
+            throw new IOException("Invalid dataOffset: " + dataOffset);
+        }
+
+        long fileSize = raf.length();
         return new CGTEXMetadata(magic, version, textureCount, dataOffset, fileSize);
     }
 

@@ -4,9 +4,40 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="432e2683-9bd8-4ad3-bb63-6fc5e743bc94" name="Changes" comment="1.1.5">
+    <list default="true" id="432e2683-9bd8-4ad3-bb63-6fc5e743bc94" name="Changes" comment="1.1.5 gradle Update">
+      <change beforePath="$PROJECT_DIR$/.gradle/7.5.1/dependencies-accessors/dependencies-accessors.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.5.1/dependencies-accessors/dependencies-accessors.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/7.5.1/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.5.1/executionHistory/executionHistory.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/7.5.1/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.5.1/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/7.5.1/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.5.1/fileHashes/fileHashes.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/7.5.1/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.5.1/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/7.5.1/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.5.1/fileHashes/resourceHashesCache.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/core/file/cgtex/TextureEntry.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/core/file/cgtex/TextureEntry.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/core/file/cgtex/reader/CGTEXFileReader.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/core/file/cgtex/reader/CGTEXFileReader.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/core/file/cgtex/writer/CGTEXFileWriter.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/core/file/cgtex/writer/CGTEXFileWriter.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/tools/cgtexEditor/CGTEXCreatorUI.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/tools/cgtexEditor/CGTEXCreatorUI.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/tools/cgtexEditor/info/TextureInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/tools/cgtexEditor/info/TextureInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/tools/cgtexEditor/preview/DDSParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/tools/cgtexEditor/preview/DDSParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/tools/cgtexEditor/preview/TextureCellRenderer.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/org/foxesworld/cge/tools/cgtexEditor/preview/TextureCellRenderer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/scripts/GTEXEditor" beforeDir="false" afterPath="$PROJECT_DIR$/build/scripts/GTEXEditor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/scripts/GTEXEditor.bat" beforeDir="false" afterPath="$PROJECT_DIR$/build/scripts/GTEXEditor.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/scriptsShadow/GTEXEditor" beforeDir="false" afterPath="$PROJECT_DIR$/build/scriptsShadow/GTEXEditor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/scriptsShadow/GTEXEditor.bat" beforeDir="false" afterPath="$PROJECT_DIR$/build/scriptsShadow/GTEXEditor.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/tmp/shadowJar/MANIFEST.MF" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/shadowJar/MANIFEST.MF" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/lastlog.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/lastlog.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/core/file/cgtex/CGTEXFile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/core/file/cgtex/CGTEXFile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/core/file/cgtex/CGTEXMetadata.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/core/file/cgtex/CGTEXMetadata.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/core/file/cgtex/TextureEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/core/file/cgtex/TextureEntry.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/core/file/cgtex/reader/CGTEXFileReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/core/file/cgtex/reader/CGTEXFileReader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/core/file/cgtex/writer/CGTEXFileWriter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/core/file/cgtex/writer/CGTEXFileWriter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/tools/cgtexEditor/CGTEXCreatorUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/tools/cgtexEditor/CGTEXCreatorUI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/tools/cgtexEditor/info/TextureInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/tools/cgtexEditor/info/TextureInfo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/tools/cgtexEditor/preview/DDSParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/tools/cgtexEditor/preview/DDSParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/tools/cgtexEditor/preview/TextureCellRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxesworld/cge/tools/cgtexEditor/preview/TextureCellRenderer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,17 +61,6 @@
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="GTEXEditor" type="f1a62948:ProjectNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="GTEXEditor" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="GTEXEditor" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="build" type="c8890929:TasksNode$1" />
               </path>
             </expand>
             <select />
@@ -76,7 +96,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "C:/Users/Aiden/Documents/GitHub/GTEXEditor/src/main/resources/theme",
+    "last_opened_file_path": "C:/Users/Aiden/Documents/GitHub/CGE/GTEXEditor",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -97,6 +117,7 @@
       <recent name="C:\Users\Aiden\Documents\GitHub\GTEXEditor\src\main\java\org\foxesworld\cge" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Aiden\Documents\GitHub\CGE\GTEXEditor\src\main\java\org\foxesworld\cge\core\file" />
       <recent name="C:\Users\Aiden\Documents\GitHub\GTEXEditor\src\main\resources\theme" />
     </key>
   </component>
@@ -108,7 +129,7 @@
       <command value="./gradlew nativeCompile " />
     </option>
   </component>
-  <component name="RunManager" selected="Gradle.GTEXEditor [build]">
+  <component name="RunManager" selected="Application.CGTEXCreatorUI">
     <configuration name="CGTEXCreatorUI" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.foxesworld.cge.tools.cgtexEditor.CGTEXCreatorUI" />
       <module name="GTEXEditor.main" />
@@ -229,7 +250,8 @@
       <workItem from="1748840745736" duration="88000" />
       <workItem from="1748840845135" duration="41000" />
       <workItem from="1748840896006" duration="431000" />
-      <workItem from="1748846918572" duration="6278000" />
+      <workItem from="1748846918572" duration="6675000" />
+      <workItem from="1748927014924" duration="1477000" />
     </task>
     <task id="LOCAL-00001" summary="1.0.0">
       <created>1748838220457</created>
@@ -273,7 +295,14 @@
       <option name="project" value="LOCAL" />
       <updated>1748860382716</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="1.1.5 gradle Update">
+      <created>1748860841476</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1748860841476</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -295,7 +324,8 @@
     <MESSAGE value="1.1.0" />
     <MESSAGE value="1.1.2" />
     <MESSAGE value="1.1.5" />
-    <option name="LAST_COMMIT_MESSAGE" value="1.1.5" />
+    <MESSAGE value="1.1.5 gradle Update" />
+    <option name="LAST_COMMIT_MESSAGE" value="1.1.5 gradle Update" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
