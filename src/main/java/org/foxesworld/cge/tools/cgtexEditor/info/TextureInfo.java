@@ -10,7 +10,7 @@ public class TextureInfo {
     private final int width, height;
     private String name;
     private final byte formatCode;
-    private final byte[] data;
+    private byte[] data;
     private BufferedImage preview;
 
     public TextureInfo(File file, int width, int height, String name, byte formatCode, byte[] data) {
@@ -44,6 +44,10 @@ public class TextureInfo {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
     }
 
     public String getName() {

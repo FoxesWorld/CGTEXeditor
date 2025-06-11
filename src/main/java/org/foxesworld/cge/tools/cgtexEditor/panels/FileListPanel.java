@@ -8,18 +8,14 @@ import org.foxesworld.cge.tools.cgtexEditor.preview.DDSParser;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * FileListPanel is a JPanel containing a list of TextureInfo items, Add/Remove buttons,
- * and an overlaid count label showing the total number of textures.
- */
 public class FileListPanel extends JPanel {
 
     private static final String FILTER_DDS = "dds";
@@ -31,23 +27,44 @@ public class FileListPanel extends JPanel {
     private final JLabel countLabel = new JLabel("0");
     private final JLayeredPane layeredPane;
 
-    /**
-     * Constructs a FileListPanel with Add DDS and Remove buttons, a JList for textures,
-     * and a layered pane that overlays a large semi-transparent count label.
-     */
     public FileListPanel(CGTEXCreatorUI cgtexCreatorUI) {
         super(new BorderLayout(5, 5));
-
 
         cgtexCreatorUI.getAddBtn().addActionListener(e -> onAdd());
         cgtexCreatorUI.getRemBtn().addActionListener(e -> onRemove());
 
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
-        //buttonsPanel.add(addBtn);
-        //buttonsPanel.add(remBtn);
 
         fileList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         fileList.setCellRenderer(new org.foxesworld.cge.tools.cgtexEditor.preview.TextureCellRenderer());
+
+        // добавляем контекстное меню "Copy name"
+        JPopupMenu popup = new JPopupMenu();
+        JMenuItem copyName = new JMenuItem("Copy name");
+        popup.add(copyName);
+
+        fileList.addMouseListener(new MouseAdapter() {
+            private void showIfPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    int idx = fileList.locationToIndex(e.getPoint());
+                    if (idx >= 0) {
+                        fileList.setSelectedIndex(idx);
+                        popup.show(fileList, e.getX(), e.getY());
+                    }
+                }
+            }
+            @Override public void mousePressed(MouseEvent e) { showIfPopup(e); }
+            @Override public void mouseReleased(MouseEvent e) { showIfPopup(e); }
+        });
+
+        copyName.addActionListener(e -> {
+            TextureInfo ti = fileList.getSelectedValue();
+            if (ti != null) {
+                Toolkit.getDefaultToolkit()
+                        .getSystemClipboard()
+                        .setContents(new StringSelection(ti.getName()), null);
+            }
+        });
 
         JScrollPane listScroll = new JScrollPane(fileList);
         listScroll.setBorder(new TitledBorder("Texture Files"));
@@ -60,7 +77,9 @@ public class FileListPanel extends JPanel {
         layeredPane.setPreferredSize(new Dimension(300, 500));
         layeredPane.setLayout(null);
 
-        listScroll.setBounds(0, 0, layeredPane.getPreferredSize().width, layeredPane.getPreferredSize().height);
+        listScroll.setBounds(0, 0,
+                layeredPane.getPreferredSize().width,
+                layeredPane.getPreferredSize().height);
         layeredPane.add(listScroll, Integer.valueOf(0));
         layeredPane.add(countLabel, Integer.valueOf(1));
 
@@ -74,58 +93,33 @@ public class FileListPanel extends JPanel {
             }
         });
 
-        this.add(buttonsPanel, BorderLayout.NORTH);
-        this.add(layeredPane, BorderLayout.CENTER);
+        add(buttonsPanel, BorderLayout.NORTH);
+        add(layeredPane, BorderLayout.CENTER);
         refreshFileList(new ArrayList<>());
     }
 
-    /**
-     * Replaces the current list model with the provided list of TextureInfo objects
-     * and updates the count label accordingly.
-     *
-     * @param newList the new list of TextureInfo objects to display
-     */
     public void refreshFileList(List<TextureInfo> newList) {
         listModel.clear();
+        textures.clear();
+        textures.addAll(newList);
         for (TextureInfo info : newList) {
             listModel.addElement(info);
         }
-        textures.clear();
-        textures.addAll(newList);
         updateCountLabel();
     }
 
-    /**
-     * Returns a copy of the current list of TextureInfo objects.
-     *
-     * @return a List containing all textures in this panel
-     */
     public List<TextureInfo> getAllTextures() {
         return new ArrayList<>(textures);
     }
 
-    /**
-     * Returns the currently selected TextureInfo from the JList.
-     *
-     * @return the selected TextureInfo, or null if none is selected
-     */
     public TextureInfo getSelectedTexture() {
         return fileList.getSelectedValue();
     }
 
-    /**
-     * Returns the underlying JList component that displays TextureInfo items.
-     *
-     * @return the JList of TextureInfo
-     */
     public JList<TextureInfo> getFileList() {
         return fileList;
     }
 
-    /**
-     * Opens a file chooser for selecting one or more DDS files, parses each with DDSParser,
-     * adds them to the internal list and list model, and updates the count label.
-     */
     private void onAdd() {
         JFileChooser chooser = UIUtils.createFileChooser("Select DDS Files", FILTER_DDS, true);
         if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
@@ -136,6 +130,7 @@ public class FileListPanel extends JPanel {
                 byte[] fileBytes = Files.readAllBytes(file.toPath());
                 TextureInfo ti = DDSParser.parseBytes(fileBytes);
                 ti.setName(UIUtils.stripExtension(file.getName()));
+                ti.setData(fileBytes);
                 textures.add(ti);
                 listModel.addElement(ti);
             } catch (IOException ex) {
@@ -150,10 +145,6 @@ public class FileListPanel extends JPanel {
         updateCountLabel();
     }
 
-    /**
-     * Removes the selected TextureInfo items from the internal list and list model,
-     * then updates the count label.
-     */
     private void onRemove() {
         List<TextureInfo> selected = fileList.getSelectedValuesList();
         for (TextureInfo info : selected) {
@@ -163,21 +154,12 @@ public class FileListPanel extends JPanel {
         updateCountLabel();
     }
 
-    /**
-     * Updates the countLabel text to reflect the number of textures and repositions it.
-     */
     private void updateCountLabel() {
         countLabel.setText(String.valueOf(textures.size()));
         repositionCountLabel();
     }
 
-    /**
-     * Repositions the countLabel in the bottom-right corner of the layered pane.
-     */
     private void repositionCountLabel() {
-        if (layeredPane == null) {
-            return;
-        }
         int w = layeredPane.getWidth();
         int h = layeredPane.getHeight();
         Dimension sz = countLabel.getPreferredSize();
