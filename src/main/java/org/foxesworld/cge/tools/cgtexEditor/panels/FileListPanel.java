@@ -1,100 +1,104 @@
 package org.foxesworld.cge.tools.cgtexEditor.panels;
 
 import org.foxesworld.cge.tools.cgtexEditor.CGTEXCreatorUI;
+import org.foxesworld.cge.tools.cgtexEditor.FileExporter;
 import org.foxesworld.cge.tools.cgtexEditor.utils.UIUtils;
 import org.foxesworld.cge.tools.cgtexEditor.info.TextureInfo;
 import org.foxesworld.cge.tools.cgtexEditor.preview.DDSParser;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileListPanel extends JPanel {
-    private static final String FILTER_DDS     = "dds";
-    private static final int    PREF_WIDTH     = 300;
-    private static final int    PREF_HEIGHT    = 500;
-    private static final int    COUNT_PADDING  = 10;
-
-    private final List<TextureInfo> textures  = new ArrayList<>();
+    private static final String FILTER_DDS = "dds";
+    private static final int COUNT_PADDING = 10;
+    private final List<TextureInfo> textures = new ArrayList<>();
     private final DefaultListModel<TextureInfo> listModel = new DefaultListModel<>();
     private final JList<TextureInfo> fileList = new JList<>(listModel);
-    private final JLabel countLabel          = new JLabel("0");
+    private final JLabel countLabel = new JLabel("0");
     private final JLayeredPane layeredPane;
 
     public FileListPanel(CGTEXCreatorUI ui) {
         super(new BorderLayout(5,5));
-
         ui.getAddBtn().addActionListener(e -> onAdd());
         ui.getRemBtn().addActionListener(e -> onRemove());
 
-        setupFileList();
-        layeredPane = setupLayeredPane();
+        fileList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        fileList.setCellRenderer(new org.foxesworld.cge.tools.cgtexEditor.preview.TextureCellRenderer());
+
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem miCopy = new JMenuItem("Copy name");
+        JMenuItem miExport = new JMenuItem("Export File");
+        menu.add(miCopy);
+        menu.add(miExport);
+
+        fileList.addMouseListener(new MouseAdapter() {
+            private void showPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    int idx = fileList.locationToIndex(e.getPoint());
+                    if (idx >= 0) {
+                        fileList.setSelectedIndex(idx);
+                        menu.show(fileList, e.getX(), e.getY());
+                    }
+                }
+            }
+            @Override public void mousePressed(MouseEvent e) { showPopup(e); }
+            @Override public void mouseReleased(MouseEvent e) { showPopup(e); }
+        });
+
+        miCopy.addActionListener(e -> {
+            TextureInfo ti = fileList.getSelectedValue();
+            if (ti != null) {
+                Toolkit.getDefaultToolkit()
+                        .getSystemClipboard()
+                        .setContents(new StringSelection(ti.getName()), null);
+            }
+        });
+
+        miExport.addActionListener(e -> {
+            TextureInfo ti = fileList.getSelectedValue();
+            if (ti != null) {
+                FileExporter.exportTexture(this, ti);
+            }
+        });
+
+        JScrollPane scroll = new JScrollPane(fileList);
+        scroll.setBorder(new TitledBorder("Texture Files"));
+
+        countLabel.setFont(countLabel.getFont().deriveFont(Font.BOLD, 48f));
+        countLabel.setForeground(new Color(0, 0, 0, 80));
+        countLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(new Dimension(300, 500));
+        layeredPane.setLayout(null);
+
+        scroll.setBounds(0, 0, 300, 500);
+        layeredPane.add(scroll, Integer.valueOf(0));
+        layeredPane.add(countLabel, Integer.valueOf(1));
+
+        layeredPane.addComponentListener(new ComponentAdapter() {
+            @Override public void componentResized(ComponentEvent e) {
+                int w = layeredPane.getWidth(), h = layeredPane.getHeight();
+                scroll.setBounds(0, 0, w, h);
+                Dimension sz = countLabel.getPreferredSize();
+                countLabel.setBounds(w - sz.width - COUNT_PADDING,
+                        h - sz.height - COUNT_PADDING,
+                        sz.width, sz.height);
+            }
+        });
 
         add(new JPanel(new FlowLayout(FlowLayout.LEFT)), BorderLayout.NORTH);
         add(layeredPane, BorderLayout.CENTER);
         refreshFileList(List.of());
-    }
-
-    private void setupFileList() {
-        fileList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        fileList.setCellRenderer(new org.foxesworld.cge.tools.cgtexEditor.preview.TextureCellRenderer());
-        fileList.setComponentPopupMenu(createPopupMenu());
-    }
-
-    private JPopupMenu createPopupMenu() {
-        JPopupMenu menu = new JPopupMenu();
-        JMenuItem miCopy   = new JMenuItem("Copy name");
-        JMenuItem miExport = new JMenuItem("Export");
-
-        miCopy.addActionListener(e -> copyName());
-        miExport.addActionListener(e -> exportSelected());
-
-        menu.add(miCopy);
-        menu.add(miExport);
-        return menu;
-    }
-
-    private JLayeredPane setupLayeredPane() {
-        JScrollPane scroll = new JScrollPane(fileList);
-        scroll.setBorder(new TitledBorder("Texture Files"));
-        scroll.setBounds(0,0,PREF_WIDTH,PREF_HEIGHT);
-
-        countLabel.setFont(countLabel.getFont().deriveFont(Font.BOLD,48f));
-        countLabel.setForeground(new Color(0,0,0,80));
-        countLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-
-        JLayeredPane pane = new JLayeredPane();
-        pane.setPreferredSize(new Dimension(PREF_WIDTH,PREF_HEIGHT));
-        pane.setLayout(null);
-        pane.add(scroll, Integer.valueOf(0));
-        pane.add(countLabel, Integer.valueOf(1));
-
-        pane.addComponentListener(new ComponentAdapter(){
-            @Override
-            public void componentResized(ComponentEvent e) {
-                Dimension size = pane.getSize();
-                scroll.setBounds(0,0,size.width,size.height);
-                repositionCount(size.width, size.height);
-            }
-        });
-
-        return pane;
-    }
-
-    private void repositionCount(int w, int h) {
-        Dimension sz = countLabel.getPreferredSize();
-        countLabel.setBounds(w - sz.width - COUNT_PADDING,
-                h - sz.height- COUNT_PADDING,
-                sz.width, sz.height);
     }
 
     public void refreshFileList(List<TextureInfo> newList) {
@@ -102,12 +106,7 @@ public class FileListPanel extends JPanel {
         textures.clear();
         textures.addAll(newList);
         newList.forEach(listModel::addElement);
-        updateCount();
-    }
-
-    private void updateCount() {
         countLabel.setText(String.valueOf(textures.size()));
-        repositionCount(layeredPane.getWidth(), layeredPane.getHeight());
     }
 
     public List<TextureInfo> getAllTextures() {
@@ -121,7 +120,6 @@ public class FileListPanel extends JPanel {
     private void onAdd() {
         JFileChooser chooser = UIUtils.createFileChooser("Select DDS Files", FILTER_DDS, true);
         if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
-
         for (File f : chooser.getSelectedFiles()) {
             try {
                 byte[] raw = Files.readAllBytes(f.toPath());
@@ -131,12 +129,15 @@ public class FileListPanel extends JPanel {
                 textures.add(ti);
                 listModel.addElement(ti);
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this,
+                JOptionPane.showMessageDialog(
+                        this,
                         "Cannot parse DDS: " + f.getName() + "\n" + ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         }
-        updateCount();
+        countLabel.setText(String.valueOf(textures.size()));
     }
 
     private void onRemove() {
@@ -144,78 +145,7 @@ public class FileListPanel extends JPanel {
             textures.removeIf(t -> t.getName().equals(ti.getName()));
             listModel.removeElement(ti);
         }
-        updateCount();
-    }
-
-    private void copyName() {
-        TextureInfo ti = getSelectedTexture();
-        if (ti != null) {
-            Toolkit.getDefaultToolkit()
-                    .getSystemClipboard()
-                    .setContents(new StringSelection(ti.getName()), null);
-        }
-    }
-
-    private void exportSelected() {
-        TextureInfo ti = getSelectedTexture();
-        if (ti == null) return;
-
-        String[] formats = {"PNG", "DDS"};
-        String fmt = (String) JOptionPane.showInputDialog(
-                this,
-                "Choose format:",
-                "Export format",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                formats,
-                formats[0]
-        );
-        if (fmt == null) return;
-
-        String ext = fmt.toLowerCase();
-        JFileChooser chooser = UIUtils.createFileChooser("Save as " + fmt, ext, false);
-        chooser.setSelectedFile(new File(ti.getName() + "." + ext));
-        if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
-
-        try {
-            if ("DDS".equals(fmt)) {
-                writeDDS(ti, chooser.getSelectedFile());
-            } else {
-                ImageIO.write(ti.getPreviewImage(), ext, chooser.getSelectedFile());
-            }
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Export error: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void writeDDS(TextureInfo ti, File out) throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(out)) {
-            fos.write(createDDSHeader(ti));
-            fos.write(ti.getData());
-        }
-    }
-
-    private static byte[] createDDSHeader(TextureInfo ti) {
-        int w = ti.getWidth(), h = ti.getHeight();
-        byte fmt = ti.getFormatCode();
-        int linear = Math.max(1, ((w+3)/4)) * Math.max(1, ((h+3)/4)) * 16;
-        ByteBuffer b = ByteBuffer.allocate(128).order(ByteOrder.LITTLE_ENDIAN);
-        // magic, size, flags, dims, linearSize, zero mipcount & reserved
-        b.putInt(0x20534444).putInt(124).putInt(0x0002100F)
-                .putInt(h).putInt(w).putInt(linear).putInt(0).putInt(0);
-        for(int i=0;i<11;i++) b.putInt(0);
-        // pixel format
-        b.putInt(32).putInt(0x4)
-                .putInt(switch(fmt) {
-                    case 1 -> 0x31545844; case 3 -> 0x33545844;
-                    case 5 -> 0x35545844; default -> 0;
-                })
-                .putInt(0).putInt(0).putInt(0).putInt(0);
-        // caps
-        b.putInt(0x1000).putInt(0).putInt(0).putInt(0).putInt(0);
-        return b.array();
+        countLabel.setText(String.valueOf(textures.size()));
     }
 
     public JList<TextureInfo> getFileList() {

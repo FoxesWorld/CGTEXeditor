@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * Main application window for creating and editing .cgtex files.
@@ -52,7 +53,8 @@ public class CGTEXCreatorUI extends JFrame {
      * Configures basic JFrame properties such as size, close operation, and logging system properties.
      */
     private void configureFrame() {
-        System.setProperty("log.dir", System.getProperty("user.dir"));
+        //System.setProperty("log.dir", System.getProperty("%APPDATA%/cgtex"));
+        initLogDirectory("APPDATA/FoxesWorld/CGTEX");
         System.setProperty("log.level", "DEBUG");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(900, 600);
@@ -278,6 +280,34 @@ public class CGTEXCreatorUI extends JFrame {
             CGTEXCreatorUI ui = new CGTEXCreatorUI();
             ui.setVisible(true);
         });
+    }
+
+    public void initLogDirectory(String pathWithEnv) {
+        String[] parts = pathWithEnv.split("[/\\\\]+");
+        StringJoiner pathBuilder = new StringJoiner(File.separator);
+
+        for (String part : parts) {
+            if (part.equalsIgnoreCase("APPDATA")) {
+                String appData = System.getenv("APPDATA");
+                if (appData == null) {
+                    throw new IllegalStateException("APPDATA переменная не определена в системе.");
+                }
+                pathBuilder.add(appData);
+            } else {
+                pathBuilder.add(part);
+            }
+        }
+
+        File logDir = new File(pathBuilder.toString());
+
+        if (!logDir.exists()) {
+            boolean created = logDir.mkdirs();
+            if (!created) {
+                throw new RuntimeException("Не удалось создать директорию: " + logDir.getAbsolutePath());
+            }
+        }
+
+        System.setProperty("log.dir", logDir.getAbsolutePath());
     }
 
     public JButton getAddBtn() {
