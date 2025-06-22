@@ -3,8 +3,8 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
-group = 'org.foxesworld.iconParser'
-version = '1.0.0-SNAPSHOT'
+group = 'org.foxesworld.cgtexEditor'
+version = '1.1.8-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -29,12 +29,12 @@ test {
 }
 
 shadowJar {
-    archiveBaseName.set('ico-viewer-app')
+    archiveBaseName.set('cgtexEditor-app')
     archiveClassifier.set('all')
 
     manifest {
         attributes(
-                'Main-Class': 'org.foxesworld.iconParser.IcoParserApp'
+                'Main-Class': 'org.foxesworld.cge.tools.cgtexEditor.CGTEXCreatorUI'
         )
     }
 }

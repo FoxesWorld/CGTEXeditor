@@ -1,5 +1,3 @@
 Manifest-Version: 1.0
-Implementation-Title: GTEXEditor
-Implementation-Version: 1.0.0-SNAPSHOT
 Main-Class: org.foxesworld.cge.tools.cgtexEditor.CGTEXCreatorUI
 
