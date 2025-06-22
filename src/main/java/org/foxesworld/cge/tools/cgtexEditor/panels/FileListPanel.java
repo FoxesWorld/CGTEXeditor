@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FileListPanel extends JPanel {
     private static final String FILTER_DDS = "dds";
@@ -25,6 +26,9 @@ public class FileListPanel extends JPanel {
     private final JList<TextureInfo> fileList = new JList<>(listModel);
     private final JLabel countLabel = new JLabel("0");
     private final JLayeredPane layeredPane;
+    private final JTextField filterField = new JTextField(20);
+
+    private List<TextureInfo> allTextures = new ArrayList<>(); // keep the full list for filtering
 
     public FileListPanel(CGTEXCreatorUI ui) {
         super(new BorderLayout(5,5));
@@ -96,7 +100,38 @@ public class FileListPanel extends JPanel {
             }
         });
 
-        add(new JPanel(new FlowLayout(FlowLayout.LEFT)), BorderLayout.NORTH);
+        // === Filter Panel ===
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // FlatLaf placeholder:
+        filterField.putClientProperty("JTextField.placeholderText", "Texture Filter");
+
+        // Create a panel with BorderLayout to hold the filterField and icon inside it
+        JPanel filterFieldPanel = new JPanel(new BorderLayout());
+        filterFieldPanel.setPreferredSize(new Dimension(220, filterField.getPreferredSize().height + 2));
+        filterFieldPanel.add(filterField, BorderLayout.CENTER);
+
+        // FlatLaf search icon
+        JLabel searchIconLabel = new JLabel();
+        Icon icon = UIManager.getIcon("Search.icon");
+        if (icon != null) {
+            searchIconLabel.setIcon(icon);
+        } else {
+            searchIconLabel.setText("\uD83D\uDD0D");
+        }
+        searchIconLabel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
+        searchIconLabel.setCursor(Cursor.getDefaultCursor());
+        // The icon will be inside the text field on the right
+        filterFieldPanel.add(searchIconLabel, BorderLayout.EAST);
+
+        filterPanel.add(filterFieldPanel);
+        add(filterPanel, BorderLayout.NORTH);
+
+        filterField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { filterList(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { filterList(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { filterList(); }
+        });
+
         add(layeredPane, BorderLayout.CENTER);
         refreshFileList(List.of());
     }
@@ -104,13 +139,33 @@ public class FileListPanel extends JPanel {
     public void refreshFileList(List<TextureInfo> newList) {
         listModel.clear();
         textures.clear();
+        allTextures.clear();
         textures.addAll(newList);
-        newList.forEach(listModel::addElement);
+        allTextures.addAll(newList);
+        // apply filter if filterField is not empty
+        filterList();
+        countLabel.setText(String.valueOf(textures.size()));
+    }
+
+    private void filterList() {
+        String filter = filterField.getText().trim().toLowerCase();
+        listModel.clear();
+        textures.clear();
+        List<TextureInfo> filtered;
+        if (filter.isEmpty()) {
+            filtered = new ArrayList<>(allTextures);
+        } else {
+            filtered = allTextures.stream()
+                    .filter(ti -> ti.getName() != null && ti.getName().toLowerCase().contains(filter))
+                    .collect(Collectors.toList());
+        }
+        textures.addAll(filtered);
+        filtered.forEach(listModel::addElement);
         countLabel.setText(String.valueOf(textures.size()));
     }
 
     public List<TextureInfo> getAllTextures() {
-        return new ArrayList<>(textures);
+        return new ArrayList<>(allTextures);
     }
 
     public TextureInfo getSelectedTexture() {
@@ -126,8 +181,7 @@ public class FileListPanel extends JPanel {
                 TextureInfo ti = DDSParser.parseBytes(raw);
                 ti.setName(UIUtils.stripExtension(f.getName()));
                 ti.setData(raw);
-                textures.add(ti);
-                listModel.addElement(ti);
+                allTextures.add(ti);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(
                         this,
@@ -137,15 +191,14 @@ public class FileListPanel extends JPanel {
                 );
             }
         }
-        countLabel.setText(String.valueOf(textures.size()));
+        filterList();
     }
 
     private void onRemove() {
         for (TextureInfo ti : fileList.getSelectedValuesList()) {
-            textures.removeIf(t -> t.getName().equals(ti.getName()));
-            listModel.removeElement(ti);
+            allTextures.removeIf(t -> t.getName().equals(ti.getName()));
         }
-        countLabel.setText(String.valueOf(textures.size()));
+        filterList();
     }
 
     public JList<TextureInfo> getFileList() {

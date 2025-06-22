@@ -52,7 +52,7 @@ public class UIUtils {
             if (icoStream != null) {
                 ICOParser parser = new ICOParser();
                 java.util.List<BufferedImage> iconsList = parser.parse(icoStream);
-                BufferedImage bestIcon = parser.getBestIcon(iconsList);
+                BufferedImage bestIcon = parser.getBestMatchingIcon(iconsList, 256, 256);
                 if (bestIcon != null) {
                     frame.setIconImages(java.util.List.of(bestIcon));
                 }
